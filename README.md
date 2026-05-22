@@ -15,4 +15,3 @@ All skills authenticate against the Karet web API using:
 
 The skills assume the user already has a running Karet instance and
 data sitting in S3 under their pipeline's `raw/` prefix.
-# karet-skills
