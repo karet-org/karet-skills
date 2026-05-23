@@ -43,8 +43,12 @@ Most likely cause: <one sentence>
   column, but `input_patterns` don't match real descriptions. Read
   raw `description` values and pick canonical patterns.
 - **Empty / stale partitions** -- the job didn't run after the last
-  CSV upload. Check the jobs endpoint; if the most recent job is
-  older than the most recent CSV upload, trigger a manual run.
+  CSV upload. List `pipelines/<slug>/jobs/` in S3; if the most recent
+  job is older than the most recent CSV under
+  `pipelines/<slug>/raw/`, the webhook didn't fire (check
+  `KARET_WEBHOOK_SECRET` is set on both sides) or the run is still
+  debouncing. The user can click "Run" on `<site>/p/<slug>/jobs`
+  to trigger one manually.
 - **Wrong agg** -- `sum` on a string column always returns 0.
   Always confirm the column type matches the agg.
 - **Worker not running** -- if `jobs.errors[0]` is a network /
