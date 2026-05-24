@@ -31,3 +31,34 @@ See `karet-pipeline-builder/references/ast-cookbook.md` for every
 `partition_by.column` must be a column produced by the mapping (i.e.
 in the target schema), not a raw source column. Granularities:
 `day | week | month | year`.
+
+## Lookup-derived columns
+
+There are two common shapes.
+
+**Strict tagging** (`category`-style): use a `lookup_ref` directly.
+Unmatched rows return `null` (or the lookup's `catch_all` if set). Use
+this when the lookup is a closed enum (e.g. ISO country codes) and a
+miss should be visibly null.
+
+```jsonc
+{ "name": "category",
+  "expr": { "kind": "lookup_ref", "lookup_id": "categories",
+            "input": <upper(trim(col(description)))> } }
+```
+
+**Normalize-with-fallback** (`merchant`-style): wrap the lookup in
+`coalesce` paired with the cleaned input. Use this when the lookup is
+a curated subset of a long tail (e.g. canonical merchant names) and
+unmatched rows should still appear in the dashboard with their raw
+description.
+
+```jsonc
+{ "name": "merchant",
+  "expr": { "kind": "coalesce",
+            "args": [
+              { "kind": "lookup_ref", "lookup_id": "merchants",
+                "input": <upper(trim(col(description)))> },
+              <upper(trim(col(description)))>
+            ] } }
+```

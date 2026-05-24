@@ -71,9 +71,23 @@ Source of truth: `AstNode` in `src/karet/lib/types/config.ts`.
 ```
 
 The `input` is what gets matched against the lookup's `input_patterns`.
-Always normalize before lookup if the lookup is `case_insensitive` --
-the worker does case-fold itself, but matching is more predictable
+Always normalize before lookup if the lookup is `case_insensitive`.
+The worker does case-fold itself, but matching is more predictable
 when both sides agree.
+
+When the lookup has no `catch_all`, an unmatched input returns `null`.
+Pair with `coalesce` to fall back to the raw input. See the
+"Normalize-with-fallback" recipe below.
+
+## Coalesce
+
+```jsonc
+{ "kind": "coalesce", "args": [<expr1>, <expr2>, …] }
+```
+
+Returns the first non-null arg; `null` if every arg is null. Typical
+use: wrap a `lookup_ref` against a curated subset and supply the raw
+input as the fallback arg.
 
 ## Arithmetic
 
@@ -98,6 +112,23 @@ that the partitioner doesn't already handle for you):
 { "kind": "substring",
   "input": { "kind": "col", "name": "iso_date" },
   "start": 0, "length": 7 }
+```
+
+**Normalize-with-fallback** (canonical merchant name when matched, raw
+cleaned description otherwise):
+
+```jsonc
+{ "kind": "coalesce",
+  "args": [
+    { "kind": "lookup_ref",
+      "lookup_id": "merchants",
+      "input": { "kind": "upper",
+                 "input": { "kind": "trim",
+                            "input": { "kind": "col", "name": "description" } } } },
+    { "kind": "upper",
+      "input": { "kind": "trim",
+                 "input": { "kind": "col", "name": "description" } } }
+  ] }
 ```
 
 **Conditionally negate** (turn a positive amount into a signed one based
