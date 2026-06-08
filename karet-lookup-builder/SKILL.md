@@ -23,22 +23,28 @@ enrich a column. Common shapes:
    `input_patterns`), `output`. If the user has many inputs per output,
    the input column may be pipe-delimited (`STARBUCKS|CAFE|RAMEN`)
    or the file may have one row per pattern with repeated outputs.
-2. **Pick a `match` strategy.**
-   - **`keyword_substring`** -- the input pattern is found anywhere in
-     the lookup target. Default for category-style data where source
-     descriptions are noisy ("STARBUCKS #4582" matches "STARBUCKS").
-   - **`exact`** -- the entire lookup target equals the input pattern.
-     Use when both sides are canonical (ISO country codes, internal
-     account IDs).
-   - **`regex`** -- the lookup target matches the regex. Use sparingly
-     -- harder to debug.
+2. **Set the `match` field.** The worker's matcher does
+   case-(in)sensitive **substring** matching only: a row matches when any
+   `input_pattern` is found anywhere in the input (`STARBUCKS #4582`
+   matches `STARBUCKS`). Write `match: "keyword_substring"` for clarity,
+   but be aware the worker does not actually read this field today, so
+   `exact` and `regex` are NOT implemented. Do not offer them; a config
+   that sets `match: "exact"` still gets substring behavior, silently.
+   If you need exact matching, anchor it yourself (e.g. canonicalize both
+   sides upstream) rather than relying on a `match` value.
 3. **Pick a case strategy.** Default `case_insensitive: true`. Real
    data is rarely case-stable.
 4. **Group inputs by output.** Each `LookupRow` is `{ input_patterns:
    string[], output: string }`. Multiple inputs per output collapse
    into one row.
-5. **Emit the JSON.** See `references/lookup-shape.md`.
-6. **(Optional) Catch-all.** Ask if there should be a default output
+5. **Resolve overlaps with `priority`.** Since matching is substring
+   based, a broad pattern can shadow a specific one (e.g. `AMAZON` →
+   SHOPPING would catch `AMAZON ... PAYROLL` before an INCOME row). When
+   two rows can match the same input, set a higher `priority` (integer,
+   default `0`) on the row that should win. Ties fall back to definition
+   order.
+6. **Emit the JSON.** See `references/lookup-shape.md`.
+7. **(Optional) Catch-all.** Ask if there should be a default output
    when no input matches. If yes, include `catch_all: { output: "..." }`.
 
 ## Hard rules

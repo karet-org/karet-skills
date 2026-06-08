@@ -28,7 +28,7 @@ Source of truth: `AstNode` in `src/karet/lib/types/config.ts`.
 { "kind": "trim",  "input": <expr> }
 
 { "kind": "substring", "input": <expr>, "start": 0, "length": 4 }   // length null -> to end
-{ "kind": "concat",    "sep": " ",      "args": [<expr>, <expr>] }
+{ "kind": "concat",    "sep": " ",      "args": [<expr>, <expr>] }   // null args are skipped
 ```
 
 ## Dates

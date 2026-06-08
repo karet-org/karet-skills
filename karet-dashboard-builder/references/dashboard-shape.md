@@ -91,6 +91,8 @@ for offline reference.
   (`/p/<pipeline>/dashboards/<id>`) and as the S3 key
   (`pipelines/<pipeline>/dashboards/<id>.json`). Keep it
   filesystem-safe: lowercase + underscore.
+- `name` is the label shown in the nav dashboard dropdown (falls
+  back to `id` when absent), so set a readable one.
 - `analytic_table_id` must match an Analytic Table on the same
   pipeline.
 - `filters[].column` must be a column on the target table.
@@ -101,6 +103,21 @@ for offline reference.
   default is USD.
 - `icon` on KPIs: `dollar | chart | shapes | calendar`.
 - `x_bin` on line charts: `day | week | month | year`.
+- **Panel `kind`s** (full set in `dashboard.ts`): `kpi`, `summary`,
+  `doughnut`, `line`, `bar`, `table`, `symbol_map`, `choropleth_map`,
+  `sankey`. The example above only shows the common ones; check the
+  type for the exact fields of `summary`, the map panels, and `sankey`.
+- **`line.cumulative`** (boolean): plots the chronological running
+  total of the aggregated `y`, anchored at 0 on the period before the
+  first bucket. Use for "growth over time" curves.
+- **`line.where`** (AstNode[]): optional per-panel row filter, ANDed on
+  top of the dashboard filters and applied before bucketing. Handy to
+  floor a cumulative curve at a start date
+  (`date >= "2024-06-01"`) without affecting other panels.
+- **`sankey`**: `flows: SankeyFlow[]`, where each flow is
+  `{ from, to, value, agg?, where? }`. Stack multiple flows for a
+  multi-stage diagram (e.g. `description → account`, then
+  `account → category`). `agg` is `sum | abs_sum | count`.
 - `grid.gridColumn` uses CSS grid syntax. `"span 2"` makes a panel
   twice as wide; `"1 / -1"` spans the full row.
 - `grid.aspect`: `"square"` for circles/doughnuts, `"video"` for maps,

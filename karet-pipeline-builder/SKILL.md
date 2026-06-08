@@ -35,8 +35,9 @@ hand-write the `pipeline.json`. They might say things like:
    - What's the primary timestamp column?
    - Are there categorical columns that would benefit from a lookup
      (categorize, normalize, map IDs to labels)?
-   - What's the natural partition grain (`day` / `week` / `month` /
-     `year`)? Default to `month` for human-readable data.
+   - What's the natural partition grain? The worker only implements
+     `month` today (any other value fails the run with
+     `UnsupportedGranularity`), so use `month`.
 4. **Pick a slug.** Run the user-facing name through a slug-friendly
    transform (lowercase, hyphens). Confirm.
 5. **Check that the slug is free.** `aws s3 ls

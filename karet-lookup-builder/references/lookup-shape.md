@@ -19,10 +19,20 @@
 
 - **`id`**: referenced by `lookup_ref` AstNodes elsewhere. Keep short
   and lowercase.
-- **`match`**: one of `exact | keyword_substring | regex`.
+- **`match`**: write `"keyword_substring"`. The worker matches by
+  case-(in)sensitive **substring** only and does not read this field
+  today, so `exact` and `regex` do NOT exist -- setting them still
+  yields substring behavior. Don't offer other strategies.
 - **`case_insensitive`**: defaults to `false`. Almost always set to
   `true` for human-typed data.
-- **`rows`**: `{ input_patterns: string[], output: string }[]`.
+- **`rows`**: `{ input_patterns: string[], output: string, priority?: number }[]`.
+- **`priority`** (per row, optional): tie-breaker when more than one
+  row matches the same input. The matcher picks the matching row with
+  the highest `priority`; ties fall back to definition order. Defaults
+  to `0`, so omitting it preserves first-match-wins. Use it when a
+  broad pattern would otherwise shadow a specific one (e.g. an `AMAZON`
+  → SHOPPING row and an `AMAZON ... PAYROLL` → INCOME row: give INCOME
+  a higher priority).
 - **`children`**: nested lookups for hierarchical category structures.
   Leave `[]` unless the user explicitly asks.
 - **`catch_all`**: optional. `{ output: string }` returned when no

@@ -29,8 +29,9 @@ See `karet-pipeline-builder/references/ast-cookbook.md` for every
 ## Partitioning
 
 `partition_by.column` must be a column produced by the mapping (i.e.
-in the target schema), not a raw source column. Granularities:
-`day | week | month | year`.
+in the target schema), not a raw source column. Only `month`
+granularity is implemented; any other value fails the run with
+`UnsupportedGranularity`.
 
 ## Lookup-derived columns
 

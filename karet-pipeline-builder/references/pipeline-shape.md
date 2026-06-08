@@ -73,11 +73,14 @@ copy-paste reference; the live types may have evolved.
   `clean/<table>/year=YYYY/month=MM/data.parquet`.
 - `partition_by.column` must be a column produced by the mapping (not
   a raw source column).
-- `partition_by.granularity` is one of `day | week | month | year`.
+- `partition_by.granularity`: only `month` is implemented. Any other
+  value fails the run with `UnsupportedGranularity`.
 - Source `schema` types are loose strings (`string | number | int64
   | float64 | date | bool`). Analytic table `schema` types are the
   canonical Karet set: `string | int64 | float64 | date | bool`.
 - `lookup_mappings.children` is for nested lookups. Leave `[]` unless
   the user asks.
-- `match` strategies: `exact`, `keyword_substring`, `regex`. Default
-  to `keyword_substring` with `case_insensitive: true`.
+- `match`: write `"keyword_substring"`. The worker matches by
+  case-(in)sensitive **substring** only and ignores this field today,
+  so `exact` and `regex` do NOT exist. Always pair with
+  `case_insensitive: true` for human data.
